@@ -74,15 +74,17 @@ class HUTBarChart: UIView {
 
     /// Get the value point of the touching area
     open func barTopPoint(tapPoint location: CGPoint) -> CGPoint? {
+        var index: Int = 0
         for topPoint in barTopPoints {
             let sPoint = CGPoint(x: topPoint.x - spaceBetweenBar*0.5, y: topPoint.y)
             if (location.x >= sPoint.x && location.x <= sPoint.x + spaceBetweenBar*0.5) && (location.y >= sPoint.y && location.y <= last_bg_line_Y) {
                 self.higelightDot(point: topPoint)
-                self.didUpdateNewValuePoint(at: topPoint)
+                self.didUpdateNewValuePoint(at: topPoint, index: index)
                 return topPoint
             }
+            index += 1
         }
-        self.didUpdateNewValuePoint(at: nil)
+        self.didUpdateNewValuePoint(at: nil, index: 0)
         return nil
     }
     
@@ -193,11 +195,11 @@ class HUTBarChart: UIView {
 
 extension HUTBarChart {
     
-    private func didUpdateNewValuePoint(at point: CGPoint?) {
+    private func didUpdateNewValuePoint(at point: CGPoint?, index: Int) {
         if let rPoint = point {
             if rPoint != self.currentSelectValuePoint {
                 self.popover?.dismiss()
-                self.showPopoverValueView(at: rPoint)
+                self.showPopoverValueView(at: rPoint, index: index)
             }
             currentSelectValuePoint = rPoint
         } else {
@@ -241,9 +243,12 @@ extension HUTBarChart {
         highlightLayer.removeFromSuperlayer()
     }
     
-    private func showPopoverValueView(at point: CGPoint) {
+    private func showPopoverValueView(at point: CGPoint, index: Int) {
 //        let width = self.frame.width / 4
-        let aView = self.createPopoverView()
+        let dateString = indexTitles[index]
+        let amountString = String(data[index])
+        
+        let aView = self.createPopoverView(date: "2022", amount: amountString, money: dateString)
         let options = [
           .type(.up),
           .cornerRadius(5.0),
@@ -252,11 +257,19 @@ extension HUTBarChart {
           .arrowSize(CGSize(width: 10.0, height: 10.0)),
           .dismissOnBlackOverlayTap(false),
           ] as [PopoverOption]
-        self.popover = Popover(options: options, showHandler: nil, dismissHandler: nil)
+        let pPoverView = Popover(options: options, showHandler: nil, dismissHandler: nil)
+        
+        pPoverView.layer.shadowColor = kHexColor("002A5D").cgColor
+        pPoverView.layer.shadowOffset = CGSize(width: 0,height: 0)
+        pPoverView.layer.shadowRadius = 5.0
+        pPoverView.layer.shadowOpacity = 0.2
+        pPoverView.layer.shadowPath = UIBezierPath(rect: aView.bounds).cgPath
+        
+        self.popover = pPoverView
         self.popover!.show(aView, point: point, inView: self)
     }
     
-    private func createPopoverView() -> UIView {
+    private func createPopoverView(date: String, amount: String, money: String) -> UIView {
         let padding: CGFloat = 4.0
         let viewSize: CGSize = CGSize(width: 86.0, height: 52.0)
         let lableSize: CGSize = CGSize(width: viewSize.width-padding*2.0, height: 10.0)
@@ -271,11 +284,11 @@ extension HUTBarChart {
         
         let amountAttStr = NSMutableAttributedString()
         amountAttStr.append(NSAttributedString(string: "充电电量：", attributes: titleAttr))
-        amountAttStr.append(NSAttributedString(string: "35kWh", attributes: amountAttr))
+        amountAttStr.append(NSAttributedString(string: amount, attributes: amountAttr))
         
         let moneyAttStr = NSMutableAttributedString()
         moneyAttStr.append(NSAttributedString(string: "充电费用：", attributes: titleAttr))
-        moneyAttStr.append(NSAttributedString(string: "$19", attributes: moneyAttr))
+        moneyAttStr.append(NSAttributedString(string: money, attributes: moneyAttr))
         
         titleLabel.text = "2021.01"
         titleLabel.font = UIFont.systemFont(ofSize: 9.0, weight: .medium)
@@ -286,12 +299,6 @@ extension HUTBarChart {
         aView.addSubview(titleLabel)
         aView.addSubview(amountLabel)
         aView.addSubview(moneyLabel)
-        
-        aView.layer.shadowColor = kHexColor("002A5D").cgColor
-        aView.layer.shadowOffset = CGSize(width: 0,height: 0)
-        aView.layer.shadowRadius = 5.0
-        aView.layer.shadowOpacity = 0.15
-        
         return aView
     }
 }
