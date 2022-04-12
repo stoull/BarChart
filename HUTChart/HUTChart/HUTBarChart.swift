@@ -248,9 +248,15 @@ extension HUTBarChart {
         let dateString = indexTitles[index]
         let amountString = String(data[index])
         
-        let aView = self.createPopoverView(date: "2022", amount: amountString, money: dateString)
+        var popoverType: PopoverType = .up
+        
+        let aView = self.createPopoverView(atPoint: point, date: "2022", amount: amountString, money: dateString)
+        if point.y - aView.bounds.height < 5 {
+            popoverType = .down
+        }
+        
         let options = [
-          .type(.up),
+          .type(popoverType),
           .cornerRadius(5.0),
           .animationIn(0.2),
           .blackOverlayColor(UIColor.clear),
@@ -269,11 +275,17 @@ extension HUTBarChart {
         self.popover!.show(aView, point: point, inView: self)
     }
     
-    private func createPopoverView(date: String, amount: String, money: String) -> UIView {
+    private func createPopoverView(atPoint: CGPoint, date: String, amount: String, money: String) -> UIView {
         let padding: CGFloat = 4.0
         let viewSize: CGSize = CGSize(width: 86.0, height: 52.0)
+        
+        var titleOrigin_y: CGFloat = padding
+        if atPoint.y - viewSize.height < 5 {
+            titleOrigin_y = padding*4
+        }
+        
         let lableSize: CGSize = CGSize(width: viewSize.width-padding*2.0, height: 10.0)
-        let titleLabel = UILabel(frame: CGRect(origin: CGPoint(x: padding, y: padding), size: lableSize))
+        let titleLabel = UILabel(frame: CGRect(origin: CGPoint(x: padding, y: titleOrigin_y), size: lableSize))
         let amountLabel = UILabel(frame: CGRect(origin: CGPoint(x: padding, y: titleLabel.frame.maxY+4.0), size: lableSize))
         let moneyLabel = UILabel(frame: CGRect(origin: CGPoint(x: padding, y: amountLabel.frame.maxY+4.0), size: lableSize))
         titleLabel.textColor = kHexColor("343434")
