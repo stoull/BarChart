@@ -76,8 +76,9 @@ class HUTBarChart: UIView {
     open func barTopPoint(tapPoint location: CGPoint) -> CGPoint? {
         var index: Int = 0
         for topPoint in barTopPoints {
-            let sPoint = CGPoint(x: topPoint.x - spaceBetweenBar*0.5, y: topPoint.y)
-            if (location.x >= sPoint.x && location.x <= sPoint.x + spaceBetweenBar*0.5) && (location.y >= sPoint.y && location.y <= last_bg_line_Y) {
+            let sPoint = CGPoint(x: topPoint.x - (spaceBetweenBar+barWidth)*0.5, y: topPoint.y)
+            //  && (location.y >= sPoint.y && location.y <= last_bg_line_Y)
+            if (location.x >= sPoint.x && location.x <= sPoint.x + spaceBetweenBar+barWidth) {
                 self.higelightDot(point: topPoint)
                 self.didUpdateNewValuePoint(at: topPoint, index: index)
                 return topPoint

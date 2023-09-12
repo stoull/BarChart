@@ -96,6 +96,9 @@ class HUTBarCoordinateView: UIView {
             titleStr.draw(in: tRect)
         }
         
+        // for button side
+        
+        
         UIGraphicsPopContext()
     }
 }
